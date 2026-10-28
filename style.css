@@ -1663,3 +1663,11 @@ html{scrollbar-gutter:stable}
 .analytics-preference-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
 .analytics-preference-actions button{border:1px solid #ded4ef;border-radius:999px;background:#f6f2fc;color:var(--purple);padding:10px 15px;font:500 14px/1.5 'DM Sans',sans-serif;cursor:pointer}
 .analytics-preference-actions button:hover{background:#eee8fb;border-color:#b9a1dc}
+
+/* Desktop cafe entry point: a quieter alternative to the main work button. */
+.hero-ctas{display:flex;align-items:center;flex-wrap:wrap;gap:12px;max-width:100%}
+.button.cafe-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:9px 20px;border:1px solid rgba(104,70,205,.35);border-radius:999px;background:transparent;color:var(--purple);box-shadow:none;font-size:16px;font-weight:700;line-height:1.45;letter-spacing:-.01em;backdrop-filter:none;-webkit-backdrop-filter:none;transition:background-color .18s ease,border-color .18s ease,color .18s ease}
+.button.cafe-link:hover{background:rgba(104,70,205,.07);border-color:var(--purple);box-shadow:none;transform:none}
+.button.cafe-link:focus-visible{outline:3px solid rgba(104,70,205,.45);outline-offset:4px}
+.button.cafe-link[hidden]{display:none}
+@media(max-width:800px){.button.cafe-link{display:none}}

@@ -1,3 +1,4 @@
+if(location.protocol!=='file:'){
 (()=>{
  'use strict';
  const projectId='yzytsdcyq0',storageKey='amber-portfolio-analytics-v1',maxAge=180*24*60*60*1000;
@@ -75,3 +76,5 @@
  }
  if(document.readyState==='complete')init();else document.addEventListener('DOMContentLoaded',init,{once:true});
 })();
+
+}
