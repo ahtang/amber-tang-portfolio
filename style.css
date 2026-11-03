@@ -1670,7 +1670,7 @@ html{scrollbar-gutter:stable}
 .button.cafe-link:hover{background:rgba(104,70,205,.07);border-color:var(--purple);box-shadow:none;transform:none}
 .button.cafe-link:focus-visible{outline:3px solid rgba(104,70,205,.45);outline-offset:4px}
 .button.cafe-link[hidden]{display:none}
-@media(max-width:800px){.button.cafe-link{display:none}}
+
 
 .resume-pdf-sheet{position:relative;margin:0 auto;background:white}
 .resume-pdf-text{position:absolute;inset:0;overflow:hidden;text-align:initial;line-height:1;transform-origin:0 0;-webkit-text-size-adjust:none;text-size-adjust:none}
