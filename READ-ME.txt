@@ -2,7 +2,7 @@ OPENING THE PORTFOLIO
 
 Unzip this entire archive, then double-click index.html. Keep all folders and files together. No launcher or Terminal is required.
 
-The résumé modal renders the original PDF with selectable text and zoom controls, both locally and on GitHub Pages.
+The résumé links open the original PDF in a new browser tab.
 
 UPDATING GITHUB PAGES
 
