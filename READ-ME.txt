@@ -2,7 +2,7 @@ OPENING THE PORTFOLIO
 
 Unzip this entire archive, then double-click index.html. Keep all folders and files together. No launcher or Terminal is required.
 
-The resume modal uses a high-resolution image for local viewing, with zoom and fit controls. The original PDF remains available through Download PDF. When hosted, the PDF viewer uses the full PDF renderer.
+The résumé modal renders the original PDF with selectable text and zoom controls, both locally and on GitHub Pages.
 
 UPDATING GITHUB PAGES
 

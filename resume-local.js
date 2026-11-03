@@ -3,7 +3,8 @@ const modal=document.getElementById('resume-viewer');
 const viewport=modal.querySelector('.resume-document'),host=modal.querySelector('.resume-page-host');
 const status=document.getElementById('resume-pdf-status'),zoomLevel=document.getElementById('resume-zoom-level');
 const minus=document.getElementById('resume-zoom-out'),plus=document.getElementById('resume-zoom-in'),fitWidth=document.getElementById('resume-fit'),fitHeight=document.getElementById('resume-fit-height');
-const previewUrl=portfolioURL('/assets/resume-local.png');
+const localPdf = location.protocol === 'file:';
+let lib;
 let pdf=null,page=null,loading=null,zoom=1,mode='height',sequence=0,trigger=null,previousOverflow='',resizeTimer,cached=null;
 let natural={width:612,height:792};
 function fitScale(){
@@ -15,23 +16,30 @@ function controls(){
  fitWidth.setAttribute('aria-pressed',mode==='width'?'true':'false');fitHeight.setAttribute('aria-pressed',mode==='height'?'true':'false');
  zoomLevel.textContent=`${Math.round(zoom*100)}%`;
 }
-function preview(){
- const image=new Image();image.src=previewUrl;image.alt='Amber Tang’s resume. Download the PDF for selectable text.';
- image.style.width=`${natural.width*zoom}px`;image.style.height=`${natural.height*zoom}px`;
- image.decoding='async';host.replaceChildren(image);
-}
 async function loadPdf(){
  if(page)return page;
  if(!loading)loading=(async()=>{
-  const lib=await import('/assets/pdfjs/pdf.min.mjs');
-  lib.GlobalWorkerOptions.workerSrc='/assets/pdfjs/pdf.worker.min.mjs';
-  pdf=await lib.getDocument({url:modal.querySelector('.resume-download').href,standardFontDataUrl:'/assets/pdfjs/standard_fonts/',cMapUrl:'/assets/pdfjs/cmaps/',cMapPacked:true,wasmUrl:'/assets/pdfjs/wasm/',iccUrl:'/assets/pdfjs/iccs/',isEvalSupported:false}).promise;
+  if(localPdf){
+   if(!window.resumePdfLocal)await new Promise((resolve,reject)=>{
+    const script=document.createElement('script');
+    script.src=portfolioURL('/assets/resume-pdf-local.js');script.onload=resolve;script.onerror=reject;
+    document.head.append(script);
+   });
+   const payload=window.resumePdfLocal;
+   await import(payload.worker);
+   lib=await import(payload.engine);
+   const data=Uint8Array.from(atob(payload.pdf),character=>character.charCodeAt(0));
+   pdf=await lib.getDocument({data,isEvalSupported:false,useWasm:false}).promise;
+  }else{
+   lib=await import('/assets/pdfjs/pdf.min.mjs');
+   lib.GlobalWorkerOptions.workerSrc='/assets/pdfjs/pdf.worker.min.mjs';
+   pdf=await lib.getDocument({url:modal.querySelector('.resume-download').href,standardFontDataUrl:'/assets/pdfjs/standard_fonts/',cMapUrl:'/assets/pdfjs/cmaps/',cMapPacked:true,wasmUrl:'/assets/pdfjs/wasm/',iccUrl:'/assets/pdfjs/iccs/',isEvalSupported:false}).promise;
+  }
   page=await pdf.getPage(1);natural=page.getViewport({scale:1});return page;
  })().catch(error=>{loading=null;throw error});
  return loading;
 }
 async function render(){
- if(portfolioLocal){status.hidden=true;return;}
  const request=++sequence;
  try{
   await loadPdf();if(request!==sequence||!modal.open)return;
@@ -39,22 +47,30 @@ async function render(){
   const view=page.getViewport({scale:zoom});
   const ratio=Math.min(window.devicePixelRatio||1,2,4096/Math.max(view.width,view.height));
   const key=`${view.width}:${view.height}:${ratio}`;
-  if(cached?.key===key){host.replaceChildren(cached.canvas);status.hidden=true;return}
+  if(cached?.key===key){host.replaceChildren(cached.sheet);status.hidden=true;return}
   const canvas=document.createElement('canvas');canvas.width=Math.ceil(view.width*ratio);canvas.height=Math.ceil(view.height*ratio);
   canvas.style.width=`${view.width}px`;canvas.style.height=`${view.height}px`;
-  canvas.setAttribute('role','img');canvas.setAttribute('aria-label','Amber Tang’s resume. Download the PDF for selectable text.');
+  canvas.setAttribute('aria-hidden','true');
+  const sheet=document.createElement('div');sheet.className='resume-pdf-sheet';
+  sheet.style.width=view.width+'px';sheet.style.height=view.height+'px';
+  const textLayer=document.createElement('div');textLayer.className='resume-pdf-text';
+  textLayer.style.setProperty('--total-scale-factor',view.scale);
+  sheet.append(canvas,textLayer);
   await page.render({canvasContext:canvas.getContext('2d'),viewport:view,transform:ratio!==1?[ratio,0,0,ratio,0,0]:null}).promise;
   if(request!==sequence||!modal.open)return;
-  cached={key,canvas};host.replaceChildren(canvas);status.hidden=true;
+  await new lib.TextLayer({textContentSource:page.streamTextContent(),container:textLayer,viewport:view}).render();
+  if(request!==sequence||!modal.open)return;
+  cached={key,sheet};host.replaceChildren(sheet);status.hidden=true;
  }catch(error){
   if(request!==sequence||!modal.open)return;
-  // Keep the lightweight preview visible if the PDF engine fails.
+  status.textContent='The PDF couldn’t load here. Use Open PDF directly below.';
+  status.hidden=false;
   console.error('Full-resolution resume preview could not load:',error);
  }
 }
-function updateView(){if(mode!=='custom')zoom=fitScale();controls();preview();render()}
+function updateView(){if(mode!=='custom')zoom=fitScale();controls();if(!host.firstChild){status.textContent='Loading résumé PDF…';status.hidden=false}render()}
 function changeZoom(value){mode='custom';zoom=Math.max(.25,Math.min(4,Math.round(value*100)/100));updateView()}
-function warm(){const image=new Image();image.src=previewUrl;if(!portfolioLocal)loadPdf().catch(()=>{})}
+function warm(){loadPdf().catch(()=>{})}
 document.querySelectorAll('.resume-link,.experience-resume').forEach(link=>{
  link.addEventListener('pointerenter',warm,{once:true});link.addEventListener('focus',warm,{once:true});
  link.addEventListener('click',event=>{
