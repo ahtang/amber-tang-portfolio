@@ -1677,3 +1677,9 @@ html{scrollbar-gutter:stable}
 .resume-pdf-text :is(span,br){color:transparent;position:absolute;white-space:pre;cursor:text;transform-origin:0 0}
 .resume-pdf-text span{font-size:calc(var(--total-scale-factor)*var(--font-height)*var(--min-font-size,1));transform:rotate(var(--rotate,0deg)) scaleX(var(--scale-x,1)) scale(calc(1 / var(--min-font-size,1)))}
 .resume-pdf-text ::selection{background:#6846cd55}
+
+/* Keep the two homepage actions on the same layer with matching elevation. */
+.hero-ctas > :is(.button.primary,.button.cafe-link){position:relative;z-index:0;box-shadow:none}
+.hero-ctas > :is(.button.primary,.button.cafe-link):hover{box-shadow:none}
+
+.hero-ctas > .button.cafe-link,.hero-ctas > .button.cafe-link:hover{background:#fff}
